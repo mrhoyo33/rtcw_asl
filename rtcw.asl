@@ -2,7 +2,8 @@ state("WolfSP")
 {
 	string16 bsp : 0x13D4, 0x8;
 	byte cs : 0x26F4, 0x0;
-	int loading: "WolfSP.exe", 0x833DD0; 
+	int loading: "WolfSP.exe", 0x833DD0;
+	int loading2: "WolfSP.exe", 0x00011DCC, 0xDE38; 
 }
 
 startup
@@ -106,5 +107,10 @@ split
 
 isLoading
 {
-	return current.loading == 2;
+	if(current.bsp == "/village2.bsp") {
+		return current.loading2 != 0;
+	}
+	else {
+		return current.loading == 2;
+	}
 }
