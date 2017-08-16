@@ -108,7 +108,7 @@ split
 isLoading
 {
 	if(current.bsp == "/village2.bsp") {
-		return current.loading2 != 0;
+		return current.loading2 == 6;
 	}
 	else {
 		return current.loading == 2;
