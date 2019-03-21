@@ -2,11 +2,12 @@ state("WolfSP")
 {
 	string16 bsp : 0x13D4, 0x8;
 	byte cs : 0x26F4, 0x0;
-	int loading: "WolfSP.exe", 0x833DD0;
-	int loading2: "WolfSP.exe", 0x00011DCC, 0xDE38; 
+	int client_status: "WolfSP.exe", 0xB24EE0;
+	float camera_x: "WolfSP.exe", 0xDA9D3C;
+	int mouse: "WolfSP.exe", 0xA2B508;
 }
 
-startup
+startup 
 {
 	settings.Add("mission1", true, "Mission 1");
 	settings.Add("/escape1.bsp", true, "Escape!", "mission1");
@@ -58,6 +59,13 @@ init
 {
 	vars.visited = new List<String>();
 	vars.firstcs = true;
+	vars.running = true;
+	vars.loadStarted = false;
+}
+
+exit
+{
+	vars.running = false;
 }
 
 reset
@@ -105,12 +113,22 @@ split
 	}
 }
 
-isLoading
+update
 {
-	if(current.bsp == "/village2.bsp") {
-		return current.loading2 == 6;
+	if(current.client_status != 8 && current.client_status != 1)
+	{
+		vars.loadStarted = true;
 	}
-	else {
-		return current.loading == 2;
+	else
+	{	
+		if(current.camera_x != 0 || current.mouse == 1)
+		{
+			vars.loadStarted = false;
+		}
 	}
+}
+
+isLoading
+{	 
+	return vars.loadStarted;
 }
