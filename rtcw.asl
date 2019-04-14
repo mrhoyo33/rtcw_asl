@@ -4,7 +4,6 @@ state("WolfSP")
 	byte cs : 0x26F4, 0x0;
 	int client_status: "WolfSP.exe", 0xB24EE0;
 	float camera_x: "WolfSP.exe", 0xDA9D3C;
-	int mouse: "WolfSP.exe", 0xA2B508;
 }
 
 startup 
@@ -121,7 +120,7 @@ update
 	}
 	else
 	{	
-		if(current.camera_x != 0 || current.mouse == 1)
+		if(current.camera_x != 0)
 		{
 			vars.loadStarted = false;
 		}
