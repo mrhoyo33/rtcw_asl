@@ -2,64 +2,33 @@ state("WolfSP")
 {
 	string16 bsp : 0x13D4, 0x8;
 	byte cs : 0x26F4, 0x0;
-	int client_status: "WolfSP.exe", 0xB24EE0;
+	int client_status: 0xB24EE0;
 	float camera_x: "WolfSP.exe", 0xDA9D3C;
+	float xpos : "WolfSP.exe", 0x5F8Da4;
 }
 
 startup 
 {
-	settings.Add("mission1", true, "Mission 1");
-	settings.Add("/escape1.bsp", true, "Escape!", "mission1");
-	settings.Add("/escape2.bsp", true, "Castle Keep", "mission1");
-	settings.Add("/tram.bsp", true, "Tram Ride", "mission1");
-	
-	settings.Add("mission2", true, "Mission 2");
-	settings.Add("/village1.bsp", true, "Village", "mission2");
-	settings.Add("/crypt1.bsp", true, "Catacombs", "mission2");
-	settings.Add("/crypt2.bsp", true, "Crypt", "mission2");
-	settings.Add("/church.bsp", true, "The Defiled Church", "mission2");
-	settings.Add("/boss1.bsp", true, "Tomb", "mission2");
-	
-	settings.Add("mission3", true, "Mission 3");
-	settings.Add("/forest.bsp", true, "Forest Compound", "mission3");
-	settings.Add("/rocket.bsp", true, "Rocket Base", "mission3");
-	settings.Add("/baseout.bsp", true, "Radar Installation", "mission3");
-	settings.Add("/assault.bsp", true, "Air Base Assault", "mission3");
+	settings.Add("cat_all", true, "Full game");
+	settings.Add("cat_chap1", false, "Ominous Rumors + Dark Secret");
+	settings.Add("cat_chap2", false, "Weapons of Vengeance");
+	settings.Add("cat_chap3", false, "Deadly Designs");
+	settings.Add("cat_chap4", false, "Deathshead's Playground");
+	settings.Add("cat_chap5", false, "Return Engagement + Operation Resurrection");
 
-	settings.Add("mission4", true, "Mission 4");
-	settings.Add("/sfm.bsp", true, "Kugelstadt", "mission4");
-	settings.Add("/factory.bsp", true, "The Bombed Factory", "mission4");
-	settings.Add("/trainyard.bsp", true, "The Trainyards", "mission4");
-	settings.Add("/swf.bsp", true, "Secret Weapons Facility", "mission4");
-
-	settings.Add("mission5", true, "Mission 5");
-	settings.Add("/norway.bsp", true, "Ice Station Norway", "mission5");
-	settings.Add("/xlabs.bsp", true, "X-Labs", "mission5");
-	settings.Add("/boss2.bsp", true, "Super Solider", "mission5");
-
-	settings.Add("mission6", true, "Mission 6");
-	settings.Add("/dam.bsp", true, "Bramburg Dam", "mission6");
-	settings.Add("/village2.bsp", true, "Paderborn Village", "mission6");
-	settings.Add("/chateau.bsp", true, "Chateau Schufstaffel", "mission6");
-	settings.Add("/dark.bsp", true, "Unhallowed Ground", "mission6");
-	
-	settings.Add("mission7", true, "Mission 7");
-	settings.Add("/dig.bsp", true, "The Dig", "mission7");
-	settings.Add("/castle.bsp", true, "Return to Castle Wolfenstein", "mission7");
-	settings.Add("/end.bsp", true, "Heinrich", "mission7");
-	
 	Action<string> DebugOutput = (text) => {
-		print("[RTCW Autosplitter] "+text);
+		print("[RTCW Autosplitter] " + text);
 	};
 	vars.DebugOutput = DebugOutput;
 }
 
 init
 {
-	vars.visited = new List<String>();
 	vars.firstcs = true;
 	vars.running = true;
 	vars.loadStarted = false;
+	vars.bsp_list = new List<String>();
+	vars.visited = new List<String>();
 }
 
 exit
@@ -72,14 +41,113 @@ reset
 }
 
 start
-{
-	if (current.bsp == "/cutscene1.bsp" && current.cs == 1 && old.cs == 0) {
-		vars.DebugOutput("Timer started");
-		vars.firstcs = true;
-		vars.visited.Clear();
-		vars.visited.Add("/cutscene1.bsp");
-		vars.visited.Add("/escape1.bsp");
-		return true;
+{	
+	if(settings["cat_all"] || settings["cat_chap1"])
+	{
+		vars.bsp_list.Add("/escape1.bsp");
+		vars.bsp_list.Add("/escape2.bsp");
+		vars.bsp_list.Add("/tram.bsp");
+		vars.bsp_list.Add("/village1.bsp");
+		vars.bsp_list.Add("/crypt1.bsp");
+		vars.bsp_list.Add("/crypt2.bsp");
+		vars.bsp_list.Add("/church.bsp");
+		vars.bsp_list.Add("/boss1.bsp");
+	}
+	
+	if(settings["cat_all"] || settings["cat_chap2"])
+	{
+		vars.bsp_list.Add("/forest.bsp");
+		vars.bsp_list.Add("/rocket.bsp");
+		vars.bsp_list.Add("/baseout.bsp");
+		vars.bsp_list.Add("/assault.bsp");
+	}
+	
+	if(settings["cat_all"] | settings["cat_chap3"])
+	{
+		vars.bsp_list.Add("/sfm.bsp");
+		vars.bsp_list.Add("/factory.bsp");
+		vars.bsp_list.Add("/trainyard.bsp");
+		vars.bsp_list.Add("/swf.bsp");
+	}
+
+	if(settings["cat_all"] || settings["cat_chap4"])
+	{
+		vars.bsp_list.Add("/norway.bsp");
+		vars.bsp_list.Add("/xlabs.bsp");
+		vars.bsp_list.Add("/boss2.bsp");
+	}
+
+	if(settings["cat_all"] || settings["cat_chap5"])
+	{
+		vars.bsp_list.Add("/dam.bsp");
+		vars.bsp_list.Add("/village2.bsp");
+		vars.bsp_list.Add("/chateau.bsp");
+		vars.bsp_list.Add("/dark.bsp");
+		vars.bsp_list.Add("/dig.bsp");
+		vars.bsp_list.Add("/castle.bsp");
+		vars.bsp_list.Add("/end.bsp");
+	}
+
+	if(settings["cat_all"])
+	{
+		if (current.bsp == "/cutscene1.bsp" && current.cs == 1 && old.cs == 0) {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/cutscene1.bsp");
+			vars.visited.Add("/escape1.bsp");
+			return true;
+		}
+	}
+	if(settings["cat_chap1"])
+	{
+		if (current.bsp == "/escape1.bsp" && old.bsp != "/escape1.bsp") {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/escape1.bsp");
+			return true;
+		}
+	}
+	if(settings["cat_chap2"])
+	{
+		if (current.bsp == "/forest.bsp" && old.bsp != "/forest.bsp") {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/forest.bsp");
+			return true;
+		}
+	}
+	if(settings["cat_chap3"])
+	{
+		if (current.bsp == "/sfm.bsp" && old.bsp != "/sfm.bsp") {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/sfm.bsp");
+			return true;
+		}
+	}
+	if(settings["cat_chap4"])
+	{
+		if (current.bsp == "/norway.bsp" && old.bsp != "/norway.bsp") {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/norway.bsp");
+			return true;
+		}
+	}
+	if(settings["cat_chap5"])
+	{
+		if (current.bsp == "/dam.bsp" && old.bsp != "/dam.bsp") {
+			vars.DebugOutput("Timer started");
+			vars.firstcs = true;
+			vars.visited.Clear();
+			vars.visited.Add("/dam.bsp");
+			return true;
+		}
 	}
 }
 
@@ -87,7 +155,7 @@ split
 {
 	if(current.bsp != old.bsp) {
 		vars.DebugOutput("Map changed to " + current.bsp);
-		if(settings[current.bsp] && !vars.visited.Contains(current.bsp))
+		if(vars.bsp_list.Contains(current.bsp) && !vars.visited.Contains(current.bsp))
 		{
 			vars.DebugOutput("Map change valid.");
 			vars.visited.Add(current.bsp);
@@ -108,6 +176,53 @@ split
 		if(vars.firstcs == true) {
 			vars.firstcs = false;
 			vars.DebugOutput("First cutscene.");
+		}
+	}
+	
+	if(settings["cat_chap1"])
+	{
+		if (current.bsp == "/boss1.bsp" && current.cs == 1 && old.cs == 0) {
+			if(vars.firstcs == false) {
+				vars.DebugOutput("Second cutscene.");
+				return true;
+			}
+			if(vars.firstcs == true) {
+				vars.firstcs = false;
+				vars.DebugOutput("First cutscene.");
+			}
+		}
+	}
+	
+	if(settings["cat_chap2"])
+	{
+		if (current.bsp == "/assault.bsp" && current.cs == 1 && old.cs == 0) {
+			if(vars.firstcs == true) {
+				vars.firstcs = false;
+				vars.DebugOutput("First cutscene.");
+				return true;
+			}
+		}
+	}
+	
+	if(settings["cat_chap3"])
+	{
+		if (current.bsp == "/swf.bsp" && current.cs == 1 && old.cs == 0) {
+			if(vars.firstcs == false) {
+				vars.DebugOutput("Second cutscene.");
+				return true;
+			}
+			if(vars.firstcs == true) {
+				vars.firstcs = false;
+				vars.DebugOutput("First cutscene.");
+			}
+		}
+	}
+	
+	if(settings["cat_chap4"] && current.bsp == "/boss2.bsp")
+	{
+		if(current.xpos >= 1454.0 && old.xpos < 1454.0 && current.xpos <= 1500.0 && old.xpos > 1300.0)
+		{
+			return true;
 		}
 	}
 }
